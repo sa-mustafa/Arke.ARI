@@ -1,7 +1,9 @@
 using System;
 using Newtonsoft.Json;
 using RestSharp;
-using RestSharp.Authenticators;
+using RestSharp.Portable;
+using RestSharp.Portable.Authenticators;
+using RestSharp.Portable.HttpClient;
 
 namespace Arke.ARI.Middleware.Default
 {
@@ -12,13 +14,12 @@ namespace Arke.ARI.Middleware.Default
 
         public Command(StasisEndpoint info, string path)
         {
-            var options = new RestClientOptions(info.AriEndPoint)
+            Client = new RestClient(info.AriEndPoint)
             {
                 Authenticator = new HttpBasicAuthenticator(info.Username, info.Password)
             };
-            Client = new RestClient(options);
 
-            Request = new RestRequest(path);
+            Request = new RestRequest(path) {Serializer = new RestSharp.Portable.Serializers.JsonSerializer()};
         }
 
 
@@ -28,7 +29,7 @@ namespace Arke.ARI.Middleware.Default
         public string Method
         {
             get { return Request.Method.ToString(); }
-            set { Request.Method = (RestSharp.Method) Enum.Parse(typeof (RestSharp.Method), value, true); }
+            set { Request.Method = (Method) Enum.Parse(typeof (Method), value, true); }
         }
 
 
@@ -41,7 +42,7 @@ namespace Arke.ARI.Middleware.Default
 
         public void AddParameter(string name, object value, Middleware.ParameterType type)
         {
-            Request.AddParameter(name, value, (RestSharp.ParameterType)Enum.Parse(typeof(RestSharp.ParameterType), type.ToString(), true));
+            Request.AddParameter(name, value, (RestSharp.Portable.ParameterType)Enum.Parse(typeof(RestSharp.Portable.ParameterType), type.ToString(), true));
         }
     }
 }
